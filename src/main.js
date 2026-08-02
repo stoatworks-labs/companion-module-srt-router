@@ -120,7 +120,7 @@ export default class ModuleInstance extends InstanceBase {
       this.rebuild();
     } else {
       this.refreshVariableValues();
-      this.checkFeedbacks();
+      this.checkAllFeedbacks();
     }
   }
 
@@ -131,7 +131,7 @@ export default class ModuleInstance extends InstanceBase {
     UpdateVariableDefinitions(this);
     UpdatePresets(this);
     this.refreshVariableValues();
-    this.checkFeedbacks();
+    this.checkAllFeedbacks();
   }
 
   /** The source currently feeding an output, or "" when unrouted. */
