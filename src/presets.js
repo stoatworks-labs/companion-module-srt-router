@@ -1,3 +1,8 @@
+// Variable references in preset text use `self.label`, the CONNECTION's label,
+// not the module id. Companion resolves $(label:variable) against whatever the
+// operator named this connection — hardcoding the module id produces buttons
+// that render the raw $(...) text on any connection that has been renamed, and
+// on a second instance of the same module.
 import { safeId } from "./main.js";
 
 // Crosspoint presets are GENERATED from the router's live entity lists, not
@@ -107,7 +112,7 @@ export default function UpdatePresets(self) {
     const display = `routed_${safeId(output)}`;
     presets[display] = preset({
       name: `${output}: what is on it (no action)`,
-      text: `${output}\n$(srt-router:routed_${safeId(output)})`,
+      text: `${output}\n$(${self.label}:routed_${safeId(output)})`,
       bgcolor: BLACK,
       color: AMBER,
       feedbacks: [
@@ -148,7 +153,7 @@ export default function UpdatePresets(self) {
       const id = `tally_${safeId(source)}`;
       presets[id] = preset({
         name: `${source}: on air tally`,
-        text: `${source}\n$(srt-router:onair_${safeId(source)}) out`,
+        text: `${source}\n$(${self.label}:onair_${safeId(source)}) out`,
         bgcolor: BLACK,
         feedbacks: [
           {
@@ -190,7 +195,7 @@ export default function UpdatePresets(self) {
   // --- Status --------------------------------------------------------------
   presets.connected = preset({
     name: "Router is connected",
-    text: "ROUTER\n$(srt-router:connection_status)",
+    text: `ROUTER\n$(${self.label}:connection_status)`,
     bgcolor: RED,
     feedbacks: [
       {
@@ -202,7 +207,7 @@ export default function UpdatePresets(self) {
   });
   presets.counts = preset({
     name: "Source and output counts (no action)",
-    text: "$(srt-router:source_count) src\n$(srt-router:output_count) out",
+    text: `$(${self.label}:source_count) src\n$(${self.label}:output_count) out`,
     bgcolor: BLACK,
   });
   presets.refresh = preset({
