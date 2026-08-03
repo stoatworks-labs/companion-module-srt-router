@@ -5,6 +5,7 @@ import UpdateFeedbacks from "./feedbacks.js";
 import UpdateVariableDefinitions from "./variables.js";
 import UpdatePresets from "./presets.js";
 import { socket } from "./api.js";
+import { aboutField } from './about-field.js'
 
 /** Companion variable ids allow only [a-zA-Z0-9_]. Router ids come from a TOML
  *  config written by hand, so they can contain anything — "cam-1" and "cam.1"
@@ -91,6 +92,10 @@ export default class ModuleInstance extends InstanceBase {
         max: 2000,
         default: 400,
       },
+    
+    	// Vendored from stoatworks-backend/about. A Companion module has no
+    	// UI of its own, so this config panel is the only surface it has.
+    	aboutField(),
     ];
   }
 
