@@ -10,6 +10,21 @@ A [Bitfocus Companion](https://bitfocus.io/companion) connection module for
 crosspoint from a Stream Deck: take any source to any output, cycle, fire a
 salvo, and add or remove sources and outputs at runtime.
 
+<!-- downloads:start -->
+
+## Download
+
+**[v1.0.0](https://github.com/stoatworks-labs/companion-module-srt-router/releases/tag/v1.0.0)**
+
+This release contains:
+
+- [`companion-module-srt-router-pkg.tgz`](https://github.com/stoatworks-labs/companion-module-srt-router/releases/latest/download/companion-module-srt-router-pkg.tgz) — npm package, 24 KB
+- [`srt-router-1.0.0.tgz`](https://github.com/stoatworks-labs/companion-module-srt-router/releases/download/v1.0.0/srt-router-1.0.0.tgz) — npm package, 23 KB
+
+All builds, checksums and release notes: [github.com/stoatworks-labs/companion-module-srt-router/releases](https://github.com/stoatworks-labs/companion-module-srt-router/releases).
+
+<!-- downloads:end -->
+
 ## What it does
 
 - **Actions** — take (route an output to a source), cycle an output through the
