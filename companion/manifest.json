@@ -5,7 +5,7 @@
   "name": "srt-router",
   "shortname": "srt-router",
   "description": "Drive an srt-router crosspoint from a control surface — take any source to any output, cycle sources, fire a salvo across every output, and add or remove sources and outputs at runtime, with live crosspoint and source tally.",
-  "version": "1.0.0",
+  "version": "1.0.2",
   "license": "MIT",
   "repository": "git+https://github.com/stoatworks-labs/companion-module-srt-router.git",
   "bugs": "https://github.com/stoatworks-labs/companion-module-srt-router/issues",

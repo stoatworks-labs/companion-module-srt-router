@@ -12,13 +12,14 @@ export default function UpdateActions(self) {
 
   /** Resolve an output field, allowing a typed/variable id so a button can
    *  survive the dropdown being empty at edit time (a router that was offline
-   *  when the button was built). */
-  const resolve = async (event, key) => {
-    const raw = event.options[key];
-    const value =
-      typeof raw === "string" ? await self.parseVariablesInString(raw) : raw;
-    return String(value ?? "").trim();
-  };
+   *  when the button was built).
+   *
+   *  An option declared `useVariables: true` arrives already expanded —
+   *  Companion resolves it before invoking the callback. `parseVariablesInString`
+   *  does not exist in @companion-module/base 2.x, neither on the callback
+   *  context nor on InstanceBase, so calling it was both redundant and fatal:
+   *  every Take, Cycle, Salvo and Management action threw the moment it fired. */
+  const resolve = (event, key) => String(event.options[key] ?? "").trim();
 
   const take = async (output, source) => {
     try {
@@ -53,8 +54,8 @@ export default function UpdateActions(self) {
         },
       ],
       callback: async (event) => {
-        const output = await resolve(event, "output");
-        const source = await resolve(event, "source");
+        const output = resolve(event, "output");
+        const source = resolve(event, "source");
         if (!output || !source) return;
         await take(output, source);
       },
@@ -93,7 +94,7 @@ export default function UpdateActions(self) {
         },
       ],
       callback: async (event) => {
-        const output = await resolve(event, "output");
+        const output = resolve(event, "output");
         if (!output) return;
 
         let list = self.state.sources;
@@ -143,7 +144,7 @@ export default function UpdateActions(self) {
         },
       ],
       callback: async (event) => {
-        const source = await resolve(event, "source");
+        const source = resolve(event, "source");
         if (!source) return;
         for (const output of self.state.outputs) {
           try {
@@ -175,7 +176,7 @@ export default function UpdateActions(self) {
         },
       ],
       callback: async (event) => {
-        const source = await resolve(event, "source");
+        const source = resolve(event, "source");
         const list = Array.isArray(event.options.outputs)
           ? event.options.outputs
           : [];
@@ -210,9 +211,7 @@ export default function UpdateActions(self) {
         },
       ],
       callback: async (event) => {
-        const raw = await self.parseVariablesInString(
-          String(event.options.body ?? ""),
-        );
+        const raw = String(event.options.body ?? "");
         try {
           await addEntity(self, "sources", JSON.parse(raw));
           self.kinds = await fetchKinds(self);
@@ -239,9 +238,7 @@ export default function UpdateActions(self) {
         },
       ],
       callback: async (event) => {
-        const raw = await self.parseVariablesInString(
-          String(event.options.body ?? ""),
-        );
+        const raw = String(event.options.body ?? "");
         try {
           await addEntity(self, "outputs", JSON.parse(raw));
           self.kinds = await fetchKinds(self);
@@ -267,7 +264,7 @@ export default function UpdateActions(self) {
         },
       ],
       callback: async (event) => {
-        const id = await resolve(event, "id");
+        const id = resolve(event, "id");
         if (!id) return;
         try {
           await removeEntity(self, "sources", id);
@@ -292,7 +289,7 @@ export default function UpdateActions(self) {
         },
       ],
       callback: async (event) => {
-        const id = await resolve(event, "id");
+        const id = resolve(event, "id");
         if (!id) return;
         try {
           await removeEntity(self, "outputs", id);

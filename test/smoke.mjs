@@ -146,14 +146,21 @@ const self = {
     presetDefs = p;
   },
   setVariableValues: (v) => Object.assign(variableValues, v),
-  parseVariablesInString: async (s) => s,
+  // No parseVariablesInString stub: base 2.x has no such method, so stubbing it
+  // here is what let the fleet-wide bug ship green. A reintroduced call now
+  // throws in this fixture exactly as it does in Companion.
+  //
+  // `label` is a STRING, as InstanceBase's `get label()` returns — not the
+  // id-annotating helper, which is `entityLabel`. Modelling it the other way
+  // round is what hid the shadowing bug from this suite.
+  label: "srt-router",
   routedSource(output) {
     return this.state.routes?.[output] ?? "";
   },
   outputsFedBy(source) {
     return this.state.outputs.filter((o) => this.routedSource(o) === source);
   },
-  label(kind, id) {
+  entityLabel(kind, id) {
     const t = this.kinds?.[kind]?.[id];
     return t ? `${id} (${t})` : id;
   },
@@ -215,7 +222,7 @@ await check("transport kinds were fetched over HTTP", () => {
   assert.deepEqual(self.kinds.transports, ["srt", "media", "ndi"]);
 });
 await check("dropdown labels carry the transport kind", () => {
-  assert.equal(self.label("sources", "slate"), "slate (media)");
+  assert.equal(self.entityLabel("sources", "slate"), "slate (media)");
 });
 
 console.log("\n== definitions ==");
@@ -437,6 +444,100 @@ await check("no bare checkFeedbacks() survives in src/", async () => {
   }
   assert.deepEqual(offenders, [], "use checkAllFeedbacks() instead");
 });
+
+// --- the two base-2.x traps -------------------------------------------------
+// `parseVariablesInString` / `parseVariablesInField` were removed in
+// @companion-module/base 2.x — they are not on the callback context, not on
+// InstanceBase, not exported anywhere in the package. Companion expands a
+// `useVariables` option itself before invoking the callback, so the call is
+// redundant as well as fatal: it throws "... is not a function" the moment that
+// one action fires, while the module still loads and every other path keeps
+// working. The fixture above no longer stubs them, which catches any path the
+// suite exercises; this grep is the backstop for the paths it does not. It
+// matches the call form only, so prose naming the functions stays legal.
+const srcFiles = async () => {
+  const { readdirSync, readFileSync } = await import("node:fs");
+  const dir = new URL("../src/", import.meta.url).pathname;
+  return readdirSync(dir)
+    .filter((f) => /\.(js|ts)$/.test(f))
+    .map((f) => [f, readFileSync(dir + f, "utf8")]);
+};
+
+await check(
+  "no parseVariablesInString/Field call survives in src/",
+  async () => {
+    const bad = (await srcFiles())
+      .filter(([, body]) => /parseVariablesIn(String|Field)\s*\(/.test(body))
+      .map(([f]) => f);
+    assert.deepEqual(
+      bad,
+      [],
+      "read the already-resolved event.options value instead",
+    );
+  },
+);
+
+// InstanceBase defines `get label()`. An own method of the same name sits
+// earlier in the prototype chain and replaces it, so `self.label` becomes the
+// function and every `$(${self.label}:var)` in presets.js stringifies its
+// source. The id-annotating helper is `entityLabel` for exactly this reason.
+await check(
+  "ModuleInstance does not shadow InstanceBase's label getter",
+  async () => {
+    const bad = (await srcFiles())
+      .filter(([, body]) => /^\s{2}label\s*\(/m.test(body))
+      .map(([f]) => f);
+    assert.deepEqual(
+      bad,
+      [],
+      "name it entityLabel — `label` is the connection's",
+    );
+  },
+);
+
+// The symptom the shadowing produced, asserted directly: a preset whose text
+// carries a variable reference must name the connection, not a function body.
+await check(
+  "preset variable references resolve to the connection label",
+  () => {
+    const withVars = Object.entries(presetDefs).filter(([, p]) =>
+      /\$\(/.test(p.style?.text ?? ""),
+    );
+    assert.ok(
+      withVars.length > 0,
+      "expected at least one preset with a variable",
+    );
+    for (const [id, p] of withVars) {
+      const text = p.style.text;
+      assert.ok(
+        !/=>|\bfunction\b|\breturn\b/.test(text),
+        `${id}: preset text contains a stringified function: ${text}`,
+      );
+      assert.ok(
+        text.includes(`$(${self.label}:`),
+        `${id}: expected $(${self.label}:...), got ${text}`,
+      );
+    }
+  },
+);
+
+// Companion keys an installed module on id + version and discards a reinstall
+// whose pair it already has. If companion/manifest.json lags package.json, every
+// release after the manifest's version is silently refused by any Companion that
+// already has the module — the update appears to work and changes nothing.
+await check(
+  "companion/manifest.json version matches package.json",
+  async () => {
+    const { readFileSync } = await import("node:fs");
+    const read = (p) =>
+      JSON.parse(readFileSync(new URL(p, import.meta.url).pathname, "utf8"));
+    assert.equal(
+      read("../companion/manifest.json").version,
+      read("../package.json").version,
+      "bump both, or the release never reaches an existing install",
+    );
+  },
+);
 
 console.log(
   failures === 0

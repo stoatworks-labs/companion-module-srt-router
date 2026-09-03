@@ -151,7 +151,14 @@ export default class ModuleInstance extends InstanceBase {
     return this.state.outputs.filter((o) => this.routedSource(o) === source);
   }
 
-  label(kind, id) {
+  /** Annotate an entity id with its transport kind for dropdown display.
+   *
+   *  Deliberately NOT called `label`: InstanceBase defines `get label()` (the
+   *  connection's user-visible label), and an own method of that name sits
+   *  earlier in the prototype chain and replaces the getter. presets.js needs
+   *  the getter to build `$(label:variable)` references, so shadowing it made
+   *  every preset with a variable render this function's source text. */
+  entityLabel(kind, id) {
     const transport = this.kinds?.[kind]?.[id];
     return transport ? `${id} (${transport})` : id;
   }

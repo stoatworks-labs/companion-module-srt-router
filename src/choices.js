@@ -8,14 +8,14 @@
 export function outputChoices(self) {
   return self.state.outputs.map((id) => ({
     id,
-    label: self.label("outputs", id),
+    label: self.entityLabel("outputs", id),
   }));
 }
 
 export function sourceChoices(self) {
   return self.state.sources.map((id) => ({
     id,
-    label: self.label("sources", id),
+    label: self.entityLabel("sources", id),
   }));
 }
 
