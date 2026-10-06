@@ -13,12 +13,12 @@ salvo, and add or remove sources and outputs at runtime.
 
 ## Download
 
-**[v1.0.4](https://github.com/stoatworks-labs/companion-module-srt-router/releases/tag/v1.0.4)**
+**[v1.0.5](https://github.com/stoatworks-labs/companion-module-srt-router/releases/tag/v1.0.5)**
 
 This release contains:
 
 - [`companion-module-srt-router-pkg.tgz`](https://github.com/stoatworks-labs/companion-module-srt-router/releases/latest/download/companion-module-srt-router-pkg.tgz) — npm package, 24 KB
-- [`srt-router-1.0.4.tgz`](https://github.com/stoatworks-labs/companion-module-srt-router/releases/download/v1.0.4/srt-router-1.0.4.tgz) — npm package, 24 KB
+- [`srt-router-1.0.5.tgz`](https://github.com/stoatworks-labs/companion-module-srt-router/releases/download/v1.0.5/srt-router-1.0.5.tgz) — npm package, 24 KB
 
 All builds, checksums and release notes: [github.com/stoatworks-labs/companion-module-srt-router/releases](https://github.com/stoatworks-labs/companion-module-srt-router/releases).
 
