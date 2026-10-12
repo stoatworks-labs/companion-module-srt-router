@@ -1,13 +1,13 @@
 # companion-module-srt-router
 
 > **AI-assisted project.** This module was created with [Claude](https://claude.com/claude-code)
-> (Anthropic), directed and reviewed by a human author. Review it accordingly before relying on
-> it in production.
+> (Anthropic), directed and reviewed by a human author. Check it over before you rely on it for
+> a show.
 
-A [Bitfocus Companion](https://bitfocus.io/companion) connection module for
-[srt-router](https://github.com/stoatworks-labs/srt-router) — drive the
-crosspoint from a Stream Deck: take any source to any output, cycle, fire a
-salvo, and add or remove sources and outputs at runtime.
+A [Bitfocus Companion](https://bitfocus.io/companion) module for
+[srt-router](https://github.com/stoatworks-labs/srt-router). It drives the
+crosspoint from a Stream Deck, so you can take any source to any output, cycle,
+fire a salvo, and add or remove sources and outputs while it's running.
 
 <!-- downloads:start -->
 
@@ -26,68 +26,69 @@ All builds, checksums and release notes: [github.com/stoatworks-labs/companion-m
 
 ## What it does
 
-- **Actions** — take (route an output to a source), cycle an output through the
-  source list forward/back, salvo one source to every output or to a chosen set,
-  add/remove sources and outputs at runtime, and refresh the transport list.
-- **Feedbacks** — crosspoint tally (output is on source X), source-side tally
+- **Actions:** take (route an output to a source), cycle an output forward or
+  back through the source list, salvo one source to every output or to a chosen
+  set, add/remove sources and outputs at runtime, and refresh the transport list.
+- **Feedbacks:** crosspoint tally (output is on source X), source-side tally
   (this source is feeding something), source is feeding at least N outputs,
   output has no source, and router is connected.
-- **Variables** — one per output (what is on it), one per source (how many
+- **Variables:** one per output (what's on it), one per source (how many
   outputs it feeds), plus counts and connection status.
-- **Presets** — **generated from the router's live configuration**: one section
-  per output containing a crosspoint button per source with tally pre-wired,
+- **Presets:** built from the router's live configuration. There's one section
+  per output with a crosspoint button per source and the tally already wired up,
   plus next/previous and a display button; a Sources section with per-source
   tally and salvo; and Status.
 
 ## Setting it up
 
-Point the module at the address in the router's `[web] bind` (the example config
-uses `0.0.0.0:8080`).
+Point the module at whatever address is in the router's `[web] bind` (the
+example config uses `0.0.0.0:8080`).
 
-> **There is no authentication.** Anyone who can reach that port can re-route
+> **There's no authentication.** Anyone who can reach that port can re-route
 > any output and remove sources and outputs. Bind it to a management interface
-> or firewall it.
+> or put it behind a firewall.
 
-State arrives over the router's WebSocket, which re-snapshots at 5 Hz and pushes
-on change — so routing _and_ membership changes appear without polling. The
-module additionally reads the management API once per connection to learn each
-entity's transport kind.
+State comes in over the router's WebSocket, which re-snapshots at 5 Hz and
+pushes on change, so routing _and_ membership changes turn up without any
+polling. The module also reads the management API once per connection to find
+out each entity's transport kind.
 
 ## Presets appear after it connects
 
-Crosspoint presets are generated from the router's own sources and outputs,
-because those _are_ the configuration — a fixed preset list would be wrong for
-every installation. Until the module has connected and received a state push,
-the preset list is just the Status section.
+Crosspoint presets are built from the router's own sources and outputs,
+because those _are_ the configuration, and a fixed preset list would be wrong
+for every install. Until the module has connected and had a state push, the
+preset list is only the Status section.
 
-A large matrix is capped (400 crosspoint presets by default, configurable) so
-the preset browser stays usable. The cap truncates **whole outputs** rather than
-half a crosspoint row, and logs a warning naming the number needed.
+A big matrix gets capped (400 crosspoint presets by default, which you can
+change) so the preset browser stays usable. The cap drops whole outputs rather
+than half a crosspoint row, and logs a warning saying how many you'd need.
 
 ## Payload compatibility
 
-The router refuses to route between incompatible payload kinds rather than
-emitting a stream the far end cannot decode. `srt` and `media` share a class
-(both carry plain MPEG-TS, which is why a stills slate can feed an SRT output);
-`ndi` and `omt` are real envelopes and only match themselves.
+The router won't route between payload kinds that don't match, rather than
+send out a stream the far end can't decode. `srt` and `media` are in the same
+class (both carry plain MPEG-TS, which is why a stills slate can feed an SRT
+output); `ndi` and `omt` are proper envelopes and only match themselves.
 
-Two consequences here:
+That has two knock-on effects here:
 
-- Dropdowns are labelled `cam1 (srt)`, `slate (media)`, so the refusal is
-  predictable rather than a surprise at press time.
-- **Cycle skips sources the chosen output cannot take** by default. With that
-  turned off, cycling can land on a refused source and the step is simply lost.
+- Dropdowns are labelled like `cam1 (srt)` and `slate (media)`, so you can see a
+  refusal coming instead of finding out when you press the button.
+- By default, cycle skips sources the chosen output can't take. With that
+  turned off, cycling can land on a refused source and that step just gets lost.
 
-A refused take is logged as an error rather than swallowed. Note that the router
-answers **HTTP 200 with `{"ok": false}`** for a refusal, and when the crosspoint
-itself refuses an unknown id the body carries no error string at all — the
-module supplies a message in that case so the failure is not silent.
+A refused take is logged as an error rather than swallowed. Bear in mind the
+router answers a refusal with HTTP 200 and `{"ok": false}`, which is a cheerful
+way of saying no, and when the crosspoint itself refuses an unknown id the body
+has no error string in it at all. The module supplies its own message in that
+case, so the failure doesn't go unnoticed.
 
 ## Removal is real
 
-`Management: remove` tears the listener down and **frees its port**. It is not a
-registry delete, there is no undo, and a source declared in the router's TOML is
-exactly as removable as one added at runtime.
+`Management: remove` tears the listener down and frees its port. It's not a
+registry delete and there's no undo, and a source declared in the router's TOML
+can be removed just as easily as one added at runtime.
 
 ## Tests
 
@@ -95,14 +96,14 @@ exactly as removable as one added at runtime.
 npm test
 ```
 
-Drives the module's real source against a fake router — a real HTTP server and a
-real WebSocket — covering the generated presets, both tallies, cycle's
+This runs the module's actual code against a pretend router (a real HTTP server
+and a real WebSocket). It covers the generated presets, both tallies, cycle's
 compatibility filtering, and the 200-with-`ok:false` refusal path.
 
 ## Installing
 
-Not in the official Companion module store. Install via
-**Settings → Developer modules path**.
+It's not in the official Companion module store, so install it as a developer
+module through **Settings → Developer modules path**.
 
 <!-- attributions:start -->
 This project is built on other people's work — see [ATTRIBUTIONS.md](ATTRIBUTIONS.md).
@@ -110,4 +111,4 @@ This project is built on other people's work — see [ATTRIBUTIONS.md](ATTRIBUTI
 
 ## Licence
 
-MIT — see [LICENSE](LICENSE).
+MIT, see [LICENSE](LICENSE).
