@@ -9,6 +9,8 @@ A [Bitfocus Companion](https://bitfocus.io/companion) module for
 crosspoint from a Stream Deck, so you can take any source to any output, cycle,
 fire a salvo, and add or remove sources and outputs while it's running.
 
+The [project page](https://stoatworks-labs.com/software/companion-srt-router/) has the downloads and the [user guide](https://stoatworks-labs.com/software/companion-srt-router/guide/).
+
 <!-- downloads:start -->
 
 ## Download
