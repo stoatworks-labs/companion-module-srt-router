@@ -1,11 +1,11 @@
-import { InstanceBase, Regex, InstanceStatus } from "@companion-module/base";
+import { InstanceBase, InstanceStatus } from "@companion-module/base";
 import { UpgradeScripts } from "./upgrades.js";
 import UpdateActions from "./actions.js";
 import UpdateFeedbacks from "./feedbacks.js";
 import UpdateVariableDefinitions from "./variables.js";
 import UpdatePresets from "./presets.js";
 import { socket } from "./api.js";
-import { aboutField } from './about-field.js'
+import { aboutField } from "./about-field.js";
 
 /** Companion variable ids allow only [a-zA-Z0-9_]. Router ids come from a TOML
  *  config written by hand, so they can contain anything — "cam-1" and "cam.1"
@@ -59,21 +59,27 @@ export default class ModuleInstance extends InstanceBase {
         value:
           "Point this at the address in the router's <code>[web] bind</code>. <b>There is no authentication</b> — anyone who can reach the port can re-route any output and remove sources. Keep it on a management interface.",
       },
+      // Plain text and number fields rather than Regex.HOSTNAME / Regex.PORT,
+      // which base 2.2.2 deprecated. A saved string port is converted in
+      // upgrades.js.
       {
         type: "textinput",
         id: "host",
         label: "Router host",
+        tooltip: "IP address (IPv4 or IPv6) or hostname",
         width: 8,
+        minLength: 1,
         default: "127.0.0.1",
-        regex: Regex.HOSTNAME,
       },
       {
-        type: "textinput",
+        type: "number",
         id: "port",
         label: "Port",
         width: 4,
-        default: "8080",
-        regex: Regex.PORT,
+        min: 1,
+        max: 65535,
+        asInteger: true,
+        default: 8080,
       },
       {
         type: "static-text",
@@ -92,10 +98,10 @@ export default class ModuleInstance extends InstanceBase {
         max: 2000,
         default: 400,
       },
-    
-    	// Vendored from stoatworks-backend/about. A Companion module has no
-    	// UI of its own, so this config panel is the only surface it has.
-    	aboutField(),
+
+      // Vendored from stoatworks-backend/about. A Companion module has no
+      // UI of its own, so this config panel is the only surface it has.
+      aboutField(),
     ];
   }
 
